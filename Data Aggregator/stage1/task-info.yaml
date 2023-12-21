@@ -1,0 +1,12 @@
+type: edu
+files:
+  - name: src/aggregator/Application.java
+    visible: true
+  - name: build.gradle
+    visible: true
+  - name: src/resources/application.properties
+    visible: true
+  - name: test/ApplicationTests.java
+    visible: false
+  - name: test/DataServer.java
+    visible: false
