@@ -15,7 +15,7 @@ public class Application {
 
 @RestController
 class DataRestController {
-    @GetMapping("/data")
+    @GetMapping("/aggregate")
     public String getData() {
         RestTemplate template = new RestTemplate();
         var url = "http://localhost:8889/ping";

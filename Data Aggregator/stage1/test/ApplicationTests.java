@@ -12,7 +12,7 @@ public class ApplicationTests extends SpringTest {
 
     CheckResult testPing() {
         CheckResult result;
-        var response = get("/data").send();
+        var response = get("/aggregate").send();
 
         System.out.println(getRequestDetails(response));
 
