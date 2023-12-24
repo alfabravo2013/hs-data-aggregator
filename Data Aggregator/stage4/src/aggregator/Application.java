@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 @EnableCaching
@@ -48,9 +49,17 @@ class TransactionService {
 
     @Cacheable(cacheNames = "txCaches", key = "#account")
     public List<Transaction> fetchTransactions(String account) {
-        var list1 = fetchWithRetry(template, "http://localhost:8888/transactions?account=" + account);
-        var list2 = fetchWithRetry(template, "http://localhost:8889/transactions?account=" + account);
+        var list1 = CompletableFuture.supplyAsync(
+                () -> fetchWithRetry(template, "http://localhost:8888/transactions?account=" + account)
+        );
+        var list2 = CompletableFuture.supplyAsync(
+                () -> fetchWithRetry(template, "http://localhost:8889/transactions?account=" + account)
+        );
+
+        CompletableFuture.allOf(list1, list2);
+
         return Stream.of(list1, list2)
+                .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .sorted(Comparator.comparing(Transaction::timestamp).reversed())
                 .toList();

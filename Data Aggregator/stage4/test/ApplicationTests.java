@@ -22,7 +22,7 @@ public class ApplicationTests extends SpringTest {
     private final DataServer dataServer2 = new DataServer("server-2", 8889, "033", "128");
 
     CheckResult testAggregate(String account) {
-        CheckResult result;
+        CheckResult result = null;
         var start = Instant.now();
         var response = get("/aggregate")
                 .addParam("account", account)
@@ -31,11 +31,12 @@ public class ApplicationTests extends SpringTest {
         System.out.println(getRequestDetails(response));
 
         var delay = Duration.between(start, Instant.now()).getSeconds();
-        if (delay > 8) {
-            return CheckResult.wrong("It appears you application doesn't cache data properly");
+        if (delay > 4) {
+            var message = "It appears your application doesn't use asynchronous requests and/or proper data caching";
+            result = CheckResult.wrong(message);
         }
 
-        if (response.getStatusCode() == 200) {
+        if (result == null && response.getStatusCode() == 200) {
             var list1 = dataServer1.getTransactions(account);
             var list2 = dataServer2.getTransactions(account);
             var expected = Stream.of(list1, list2)
