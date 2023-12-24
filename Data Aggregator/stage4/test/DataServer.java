@@ -33,7 +33,7 @@ class DataServer {
             server = HttpServer.create(new InetSocketAddress(address, port), 0);
 
             HttpContext pingContext = server.createContext("/transactions");
-            pingContext.setHandler(new TransactionsHttpHandler(transactions));
+            pingContext.setHandler(new TransactionsHttpHandler(serverId, transactions));
 
             server.start();
         } catch (IOException e) {
@@ -79,13 +79,15 @@ class DataServer {
 }
 
 class TransactionsHttpHandler implements HttpHandler {
+    private final String serverId;
     private final Gson gson = new Gson();
     private final Map<String, List<Transaction>> transactions;
     private final List<Integer> responseCodes;
     private int index = 0;
     private int delay = 800;
 
-    public TransactionsHttpHandler(Map<String, List<Transaction>> transactions) {
+    public TransactionsHttpHandler(String serverId, Map<String, List<Transaction>> transactions) {
+        this.serverId = serverId;
         this.transactions = transactions;
         responseCodes = Stream.of(
                         Stream.generate(() -> 503).limit(1).toList(),
@@ -129,7 +131,7 @@ class TransactionsHttpHandler implements HttpHandler {
 
     private void sleep() {
         try {
-            System.out.printf("executing a long task for %d ms...%n", delay);
+            System.out.printf(serverId + " is executing a long query for %d ms...%n", delay);
             Thread.sleep(delay);
         } catch (InterruptedException ignored) {
             System.out.println("Thread " + Thread.currentThread().getName()
